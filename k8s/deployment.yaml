@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: flask
-        image: youracr.azurecr.io/flaskapp:latest
+        image: avinashaka3/flaskapp
         ports:
         - containerPort: 5000
