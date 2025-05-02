@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: flask
-        image: avinashaka3/flaskapp
+        image: avinashaka3/flaskapp:latest
         ports:
         - containerPort: 5000
