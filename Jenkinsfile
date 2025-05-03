@@ -8,30 +8,12 @@ pipeline {
     AKS_CLUSTER = 'flask-aks'
     IMAGE_NAME = 'flask-app'
     DOCKER_TAG = "latest"
-    SONARQUBE_ENV = 'MySonarServer' 
-    SONAR_TOKEN = credentials('sonarqube') 
   }
 
   stages {
-  stage('Checkout the code') {
-    steps {
-      git(branch: 'master', url: 'https://github.com/avi913/Flask_App.git')
-    }
-  }
-}
-
-
-    stage('SonarQube Analysis') {
+    stage('Checkout the code') {
       steps {
-        withSonarQubeEnv("${SONARQUBE_ENV}") {
-          sh '''
-          sonar-scanner \
-            -Dsonar.projectKey=Flask_App \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_TOKEN
-          '''
-        }
+        git branch: 'master', url: 'https://github.com/avi913/Flask_App.git'
       }
     }
 
@@ -93,3 +75,4 @@ pipeline {
     }
   }
 }
+
