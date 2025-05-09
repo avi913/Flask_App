@@ -69,9 +69,19 @@ pipeline {
   post {
     success {
       echo 'Deployed successfully to AKS!'
+      emailext(
+        subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+        body: "Good news! The build was successful.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}",
+        to: 'avinashaka3@gmail.com'
+      )
     }
     failure {
       echo 'Deployment failed!'
+      emailext(
+        subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+        body: "Oops! The build failed.\n\nJob: ${env.JOB_NAME}\nBuild Number: ${env.BUILD_NUMBER}\nBuild URL: ${env.BUILD_URL}",
+        to: 'avinashaka3@gmail.com'
+      )
     }
   }
 }
