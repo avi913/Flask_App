@@ -14,6 +14,7 @@ spec:
     spec:
       containers:
       - name: flask
-        image: avinashaka3/flaskapp:latest
+        image: flaskacr5002.azurecr.io/flask-app:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 5000
