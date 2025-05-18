@@ -3,11 +3,11 @@ pipeline {
 
   environment {
     AZURE_CREDENTIALS = credentials('azure-sp')
-    ACR_NAME = 'flaskacr5002' 
+    ACR_NAME = 'flaskacr5002'
     AKS_RG = 'project_1'
     AKS_CLUSTER = 'flask-aks'
     IMAGE_NAME = 'flask-app'
-    DOCKER_TAG = "latest"
+    DOCKER_TAG = "${BUILD_NUMBER}" // dynamic tag
   }
 
   stages {
@@ -31,19 +31,14 @@ pipeline {
       }
     }
 
-    stage('Build Docker Image') {
+    stage('Build & Push Docker Image') {
       steps {
         sh '''
         az acr login --name $ACR_NAME
         docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:$DOCKER_TAG .
-        '''
-      }
-    }
-
-    stage('Push to ACR') {
-      steps {
-        sh '''
+        docker tag $ACR_NAME.azurecr.io/$IMAGE_NAME:$DOCKER_TAG $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
         docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:$DOCKER_TAG
+        docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
         '''
       }
     }
@@ -59,6 +54,8 @@ pipeline {
     stage('Deploy to AKS') {
       steps {
         sh '''
+        # Replace image tag in deployment.yaml temporarily
+        sed -i "s|image:.*|image: $ACR_NAME.azurecr.io/$IMAGE_NAME:$DOCKER_TAG|" k8s/deployment.yaml
         kubectl apply -f k8s/deployment.yaml
         kubectl apply -f k8s/service.yaml
         '''
@@ -85,4 +82,3 @@ pipeline {
     }
   }
 }
-
