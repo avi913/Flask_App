@@ -1,36 +1,19 @@
-link:https://www.baeldung.com/ops/jenkins-enable-https
+reverse proxy setup for Jenkins ?
+pre-req:
+     •  Jenkins running on port 8080 (default)
+     •	Domain name (https://urjenkins.duckdns.org/)pointing to your EC2 public IP
+     •	Port 80 (HTTP) and 443 (HTTPS) allowed in the Security Group
+     •	NGINX and Certbot packages available
 
- sudo yum install openssl
---------------------------------------------------------
-openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
-Generating an RSA private key
---------------------------------------------------------
- openssl pkcs12 -inkey key.pem -in certificate.pem -export -out certificate.p12
-keytool -importkeystore -srckeystore ./certificate.p12 -srcstoretype pkcs12 -destkeystore jenkinsserver.jks -deststoretype JKS
---------------------------------------------------------
- sudo cp jenkinsserver.jks /var/lib/jenkins/
---------------------------------------------------------
-sudo chown jenkins:jenkins /var/lib/jenkins/jenkinsserver.jks
---------------------------------------------------------
-sudo nano /etc/systemd/system/jenkins.service
---------------------------------------------------------
-[Unit]
-Description=Jenkins Continuous Integration Server
-After=network.target
+1 install nginx (sudo apt install nginx -y) and check the nginx status: sudo systemctl status nginx
 
-[Service]
-Type=simple
-User=jenkins
-Group=jenkins
-Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
-Environment="JENKINS_HTTPS_PORT=8443"
-Environment="JENKINS_HTTPS_KEYSTORE=/var/lib/jenkins/jenkinsserver.jks"
-Environment="JENKINS_HTTPS_KEYSTORE_PASSWORD=123456"
-ExecStart=/usr/bin/java -Djava.awt.headless=true -jar /usr/share/java/jenkins.war --webroot=/var/cache/jenkins/war --httpsPort=${JENKINS_HTTPS_PORT} --httpsK>
+2 Configure Reverse Proxy: Create a new NGINX config for Jenkins:(sudo nano /etc/nginx/sites-available/Jenkins) past the code and edit the server_name: as domain for jenkins
 
-[Install]
-WantedBy=multi-user.target
+3 Enable the configuration:(sudo ln -s /etc/nginx/sites-available/jenkins /etc/nginx/sites-enabled/)
 
---------------------------------------------------------
-sudo systemctl daemon-reload
-$ sudo systemctl restart jenkins.service 
+4 After Editing: Run these commands: Test & reload NGINX:(sudo nginx -t , sudo systemctl reload nginx )
+
+5 Install Certbot and SSL (Let's Encrypt):(sudo apt install certbot python3-certbot-nginx -y)
+
+6 Run Certbot to get SSL:(sudo certbot --nginx -d urjenkins.duckdns.org)
+
